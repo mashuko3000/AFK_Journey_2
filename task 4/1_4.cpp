@@ -23,6 +23,14 @@ private:
         delete[] data;
     }
 
+    void copy_data(const Matrix& other){
+        for (size_t i = 0; i < rows; ++i){
+            for (size_t j = 0; j < cols; ++j){
+                data[i][j] = other.data[i][j];
+            }
+        }
+    }
+
 public:
     Matrix(size_t r, size_t c) : rows(r), cols(c){
     if (rows == 0 || cols == 0){
@@ -33,11 +41,7 @@ public:
 
     Matrix(const Matrix& other) : rows(other.rows), cols(other.cols){
         allocate_memory();
-        for (size_t i = 0; i < rows; ++i){
-            for (size_t j = 0; j < cols; ++j){
-                data[i][j] = other.data[i][j];
-            }
-        }
+        copy_data(other);
     }
 
     Matrix& operator=(const Matrix& other) {
@@ -46,11 +50,7 @@ public:
             rows = other.rows;
             cols = other.cols;
             allocate_memory();
-            for (size_t i = 0; i < rows; ++i) {
-                for (size_t j = 0; j < cols; ++j) {
-                    data[i][j] = other.data[i][j];
-                }
-            }
+            copy_data(other);
         }
         return *this;
     }
