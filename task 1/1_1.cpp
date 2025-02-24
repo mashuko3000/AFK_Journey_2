@@ -1,160 +1,99 @@
-#include <iostream>
 #include <fstream>
 #include <stdexcept>
-#include <cstring>
-#include <climits>
+#include <iostream>
 
-
-class Encoder{
-private:
-    unsigned char* key;
-    size_t keySize;
-    unsigned char S[256];
-
-    void initRC4(){
-        for (int i = 0; i < 256; ++i){
-            S[i] = static_cast <unsigned char>(i);
-        }
-        int j = 0;
-        for (int i = 0; i < 256; ++i){
-            j = (j + S[i] + key[i % keySize])%256;
-            std::swap(S[i], S[j]);
-        }
+class encoder {
+public:
+    encoder(unsigned char const *key, size_t key_size) {
+        set_key(key, key_size);
     }
 
-    unsigned char generateKey(int& i, int& j, unsigned char* state){
-        i = (i+j)%256;
-        j = (j + state[i]) % 256;
-        std::swap(state[i], state[j]);
-        return state[(state[i] + state[j]) % 256];
+    void set_key(unsigned char const *key, size_t key_size) {
+        KSA(key, key_size);
     }
 
-    unsigned char* readFile(const char* filePath, size_t& fileSize){
-        //opening the file
-        std::ifstream file(filePath, std::ios::binary);
-        if (!file){
+    void encode(const char *input_file, const char *output_file) {
+        std::ifstream inputFile(input_file, std::ios::binary);
+        std::ofstream outputFile(output_file, std::ios::binary);
+
+        if (!inputFile || !outputFile) {
             throw std::runtime_error("Error, while trying to open file T_T");
         }
 
-        // finding the size of file
-        file.seekg(0, std::ios::end);
-        fileSize = file.tellg();
-        file.seekg(0, std::ios::beg);
-
-        unsigned char* buffer = (unsigned char*)malloc(fileSize* sizeof(unsigned char));
-        if (buffer == nullptr){
-            throw std::runtime_error("Error, while trying allocate memory &_&");
-        }
-
-        if (!file.read(reinterpret_cast<char*>(buffer), fileSize)){
-            free(buffer);
-            throw std::runtime_error("Error, while trying to read file !_!");
-        }
-
-        file.close();
-        return buffer;
-    }
-
-    void writeFile(const char* filePath, const unsigned char* data, size_t dataSize){
-        std::ofstream file(filePath, std::ios::binary);
-        if (!file){
-            throw std::runtime_error("Error opening file, while trying to write -_-,");
-        }
-
-        if (!file.write(reinterpret_cast<const char*>(data), dataSize)){
-            throw std::runtime_error("Error, while trying to read file !_!");
-        }
-        file.close();
-    }
-public:
-    // Constructer with RC4
-    Encoder(unsigned char const* keyData, size_t keyDataSize) : key(nullptr), keySize(keyDataSize)
-    {
-        key = (unsigned char*)malloc(keySize* sizeof(unsigned char));
-        if (key == nullptr){
-            throw std::runtime_error("Error, while trying allocate memory &_&");
-        }
-
-        memcpy(key, keyData, keySize);
-        initRC4();
-    }
-
-    Encoder(const Encoder& str) : key(nullptr), keySize(str.keySize){
-        key = (unsigned char*)malloc(keySize* sizeof(unsigned char));
-        if (key == nullptr){
-            throw std::runtime_error("Error, while trying allocate memory ,_,");
-        }
-        memcpy(key, str.key, keySize);
-        memcpy(S, str.S, sizeof(S));
-    }
-
-    Encoder& operator=(const Encoder& str){
-        if (this != &str){
-            free(key);
-            keySize = str.keySize;
-            key = (unsigned char*)malloc(keySize* sizeof(unsigned char));
-            if (key == nullptr){
-                throw std::runtime_error("Error, while trying allocate memory +_+");
+        unsigned char buffer[4096];
+        while (inputFile.peek() != EOF) {
+            inputFile.read(reinterpret_cast<char *>(buffer), sizeof(buffer));
+            size_t bytebufferread = inputFile.gcount();
+            for (size_t i = 0; i < bytebufferread; ++i) {
+                buffer[i] ^= PRGA();
             }
-            memcpy(key, str.key, keySize);
-            memcpy(S, str.S, sizeof(S));
+            outputFile.write(reinterpret_cast<char *>(buffer), bytebufferread);
         }
-        return *this;
+
+        inputFile.close();
+        outputFile.close();
     }
 
-    ~Encoder(){
-        free(key);
+private:
+    static const int buf_capacity = 256;
+    unsigned char buffer[buf_capacity];
+    int i, j;
+
+    inline void swap(unsigned char &a, unsigned char &b) {
+        unsigned char temp = a;
+        a = b;
+        b = temp;
     }
 
-    void keyMutator(const char* input, const char* output, bool encrypt){
-        size_t dataSize = 0;
-        unsigned char* data = nullptr;
-        unsigned char* result = nullptr;
-
-        try
-        {
-            data = readFile(input, dataSize);
-            result = (unsigned char*)malloc(dataSize* sizeof(unsigned char));
-            if (key == nullptr){
-                throw std::runtime_error("Error, while trying allocate memory Y_Y");
-            }
-
-            int i = 0, j = 0;
-            unsigned char currentS[256];
-            std::memcpy(currentS, S, sizeof(S));
-
-            for(size_t k = 0; k < dataSize; ++k){
-                unsigned char keyStrem = generateKey(i, j, currentS);
-                result[k] = data[k]^keyStrem;
-            }
-            writeFile(output, result, dataSize);
-            std::cout << (encrypt ? "File is encrypted" : "File if decrypted") << std::endl;
+    void KSA(const unsigned char *key, size_t key_size) {
+        for (int i = 0; i < buf_capacity; i++) {
+            buffer[i] = i;
         }
-        catch (const std::exception& e)
-        {
-            std::cerr << "Error: " << e.what() << std::endl;
-            if (data) free(data);
-            if (result) free(result);
-            throw;
+
+        j = 0;
+        for (int i = 0; i < buf_capacity; i++) {
+            j = (j + buffer[i] + key[i % key_size]) % buf_capacity;
+            swap(buffer[i], buffer[j]);
         }
-        free(data);
-        free(result);
+
+        i = j = 0;
+    }
+
+    unsigned char PRGA() {
+        i = (i + 1) % buf_capacity;
+        j = (j + buffer[i]) % buf_capacity;
+        swap(buffer[i], buffer[j]);
+        return buffer[(buffer[i] + buffer[j]) % buf_capacity];
     }
 };
 
-int main(){
-    try{
-        unsigned char keyData[] = { 0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF };
-        size_t keySize = sizeof(keyData);
+int main() {
+    unsigned char key[] = { 0x01, 0x02, 0x03, 0x04, 0x05 };
 
-        Encoder encoder(keyData, keySize);
+    const char* input_file = "test.txt";
+    const char* encrypted_file = "encrypted.bin";
+    const char* decrypted_file = "decrypted.txt";
 
-        encoder.keyMutator("test.txt", "output.enc", true);
-        encoder.keyMutator("output.enc", "decrypted.txt", false);
-    }
-    catch (const std::exception& e){
-        std::cerr << "Error: " << e.what() << std::endl;
+    try {
+        std::cout << "Encryption of file: " << input_file << std::endl;
+        encoder enc(key, sizeof(key));
+        enc.encode(input_file, encrypted_file);
+        std::cout << "Encrypting was finished. The result was saved in " << encrypted_file << std::endl;
+
+        std::cout << "Decryption of file: " << encrypted_file << std::endl;
+        encoder dec(key, sizeof(key));
+        dec.encode(encrypted_file, decrypted_file);
+
+        encoder encc(key, sizeof(key));
+        encc.encode("image.jpg", "image_encrypted.jpg");
+        encoder decc(key, sizeof(key));
+        decc.encode("image_encrypted.jpg", "image_decrypted.jpg");
+
+        std::cout << "Decryption was finished. The result was saved in " << decrypted_file << std::endl;
+    } catch (const std::exception& e) {
+        std::cerr << "Error ?_?: " << e.what() << std::endl;
         return 1;
     }
+
     return 0;
 }
