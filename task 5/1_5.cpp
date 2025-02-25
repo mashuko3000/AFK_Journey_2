@@ -65,14 +65,6 @@ public:
             head = new_node;
         }
         else{
-            Node* current = head;
-            while(current->next && current->next->priority <= priority){
-                current = current->next;
-            }
-            new_node->next = current->next;
-            current->next = new_node;
-        }
-        return *this;
     }
 
     const char* peek() const{
