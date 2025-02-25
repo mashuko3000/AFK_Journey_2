@@ -22,6 +22,28 @@ private:
 public:
     PriorityQueue() : head(nullptr) {};
 
+    PriorityQueue(const PriorityQueue& other){
+        Node* current = other.head;
+        while (current){
+            enqueue(current->priority, current->data);
+            current = current->next;
+        }
+    }
+
+    PriorityQueue& operator=(const PriorityQueue& other){
+        if (this != &other){
+            Node* current = other.head;
+            while (current) {
+                enqueue(current->priority, current->data);
+                current = current->next;
+            }
+        }
+        return *this;
+    }
+
+    ~PriorityQueue(){
+        clear();
+    }
     void clear(){
         while(head){
             Node* temp = head;
@@ -29,21 +51,4 @@ public:
             delete temp;
         }
     }
-
-    PriorityQueue& enqueue(int priority, const char* data){
-        Node* new_node = new Node(priority, data);
-        if (!head || priority < head->priority){
-            new_node->next = head;
-            head = new_node;
-        }
-    }
-
-    const char* peek() const{
-        if (!head){
-            throw std::runtime_error("Queue is empty Y_Y");
-        }
-        return head->data;
-    }
-
-
 };
