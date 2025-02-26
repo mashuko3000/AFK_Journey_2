@@ -2,7 +2,7 @@
 #include <stdexcept>
 #include <iostream>
 
-class encoder {
+class encoder final{
 public:
     encoder(unsigned char const *key, size_t key_size) {
         set_key(key, key_size);
