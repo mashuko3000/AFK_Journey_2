@@ -12,6 +12,8 @@ Complex& Complex::operator=(const Complex& other) {
     return *this;
 }
 
+Complex::~Complex() noexcept {}
+
 double Complex::get_real() const {return real;}
 double Complex::get_imag() const {return imag;}
 
@@ -55,8 +57,10 @@ Complex Complex::operator*(const Complex& other) const {
 }
 
 Complex& Complex::operator/=(const Complex& other) {
+    const double epsilon = 1e-9;
+
     double denom = other.real * other.real + other.imag * other.imag;
-    if (denom == 0) {
+    if (std::abs(denom) < epsilon) {
         throw std::invalid_argument("Division by zero ?_?");
     }
     double new_real = (real * other.real + imag * other.imag) / denom;
@@ -68,8 +72,10 @@ Complex& Complex::operator/=(const Complex& other) {
 }
 
 Complex Complex::operator/(const Complex& other) const {
+    const double epsilon = 1e-9;
+
     double denom = other.real * other.real + other.imag * other.imag;
-    if (denom == 0){
+    if (std::abs(denom) < epsilon) {
         throw std::invalid_argument("Division by zero ?_?");
     }
 
