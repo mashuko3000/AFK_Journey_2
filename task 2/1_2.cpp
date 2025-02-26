@@ -88,40 +88,56 @@ int main(){
     logical_values_array a(0b0101);
     logical_values_array b(0b0110);
 
-    std::cout << "a & b : ";
     char buffer [50];
-    (a & b).binary_string(buffer);
-    std::cout << buffer << std::endl;
 
-    std::cout << "a | b : ";
-    (a | b).binary_string(buffer);
-    std::cout << buffer << std::endl;
+    try{
+        std::cout << "a & b : ";
+        
+        (a & b).binary_string(buffer);
+        std::cout << buffer << std::endl;
 
-    std::cout << "a ^ b : ";
-    (a ^ b).binary_string(buffer);
-    std::cout << buffer << std::endl;
+        std::cout << "a | b : ";
+        (a | b).binary_string(buffer);
+        std::cout << buffer << std::endl;
 
-    std::cout << "~a : ";
-    (~a).binary_string(buffer);
-    std::cout << buffer << std::endl;
+        std::cout << "a ^ b : ";
+        (a ^ b).binary_string(buffer);
+        std::cout << buffer << std::endl;
 
-    std::cout << "a -> b : ";
-    a.implication(b).binary_string(buffer);
-    std::cout << buffer << std::endl;
+        std::cout << "~a : ";
+        (~a).binary_string(buffer);
+        std::cout << buffer << std::endl;
 
-    std::cout << "a <-> b : ";
-    a.equivalance(b).binary_string(buffer);
-    std::cout << buffer << std::endl;
+        std::cout << "a -> b : ";
+        a.implication(b).binary_string(buffer);
+        std::cout << buffer << std::endl;
 
-    std::cout << "a NOR b : ";
-    a.pierce_arrow(b).binary_string(buffer);
-    std::cout << buffer << std::endl;
+        std::cout << "a <-> b : ";
+        a.equivalance(b).binary_string(buffer);
+        std::cout << buffer << std::endl;
 
-    std::cout << "a NAND b : ";
-    a.sheffer_stroke(b).binary_string(buffer);
-    std::cout << buffer << std::endl;
+        std::cout << "a NOR b : ";
+        a.pierce_arrow(b).binary_string(buffer);
+        std::cout << buffer << std::endl;
 
-    std::cout << "a[2]: " << a[2] << std::endl;
+        std::cout << "a NAND b : ";
+        a.sheffer_stroke(b).binary_string(buffer);
+        std::cout << buffer << std::endl;
 
+        std::cout << "a[2]: " << a[2] << std::endl;
+    }
+
+    catch (const std::out_of_range& e){
+        std::cerr<<"Out of range error: " << e.what() << std::endl;
+    }
+
+    catch (const std::invalid_argument& e){
+        std::cerr<<"Invalid argument error: " << e.what() << std::endl;
+    }
+
+    catch (...){
+        std::cerr << "Unknown error X_X" << std::endl;
+    }
+    
     return 0;
 }
