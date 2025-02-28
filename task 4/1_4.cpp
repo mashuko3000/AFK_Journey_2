@@ -8,6 +8,7 @@ private:
     size_t rows;
     size_t cols;
     double** data;
+    const double EPSILON = 1e-9;
 
     void allocate_memory() {
         data = new double*[rows];
@@ -64,7 +65,9 @@ public:
     }
 
     virtual ~Matrix() noexcept{
-        deallocate_memory();
+        if (data){
+            deallocate_memory();
+        }
     }
 
     double* operator[](size_t index) const { return data[index]; }
@@ -150,7 +153,7 @@ public:
                 }
             }
 
-            if (temp[max_row][i] == 0) {
+            if (std::abs(temp[max_row][i]) < EPSILON){
                 return 0;
             }
 
@@ -177,7 +180,7 @@ public:
             throw std::invalid_argument("Matrix must be square to compute inverse.");
         }
         double det = determinant();
-        if (det == 0) {
+        if (std::abs(det) < EPSILON) {
             throw std::invalid_argument("Matrix is singular and cannot be inverted.");
         }
 
