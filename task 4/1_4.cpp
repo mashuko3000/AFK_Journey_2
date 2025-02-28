@@ -3,7 +3,7 @@
 #include <cmath>
 #include <iomanip>
 
-class Matrix {
+class Matrix{
 private:
     size_t rows;
     size_t cols;
@@ -63,7 +63,7 @@ public:
         return *this;
     }
 
-    ~Matrix() {
+    virtual ~Matrix() noexcept{
         deallocate_memory();
     }
 
