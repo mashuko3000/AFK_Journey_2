@@ -44,7 +44,7 @@ void BinaryPriorityQueue::resize(){
             throw std::bad_alloc();
         }
 
-        for (size_t i; i<size; ++i){
+        for (size_t i = 0; i<size; ++i){
             newHeap[i] = heap[i];
         }
 
