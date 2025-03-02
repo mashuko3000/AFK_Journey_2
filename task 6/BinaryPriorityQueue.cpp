@@ -2,8 +2,6 @@
 #include <algorithm>
 #include <cstring>
 
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "DanglingPointer"
 BinaryPriorityQueue::Node::Node(int p, const char* d) : priority(p){
     try{
         data = new char[strlen(d)+1];
