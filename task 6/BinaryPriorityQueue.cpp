@@ -5,9 +5,6 @@
 BinaryPriorityQueue::Node::Node(int p, const char* d) : priority(p){
     try{
         data = new char[strlen(d)+1];
-        if (!data){
-            throw std::bad_alloc();
-        }
         strcpy(data, d);
     } catch(const std::bad_alloc& e){
         throw std::runtime_error("Memory allocation error T_T");
@@ -21,15 +18,12 @@ BinaryPriorityQueue::Node::~Node(){
 BinaryPriorityQueue::BinaryPriorityQueue() : size(0), capacity(10){
     try{
         heap = new Node*[capacity];
-        if (!heap){
-            throw std::bad_alloc();
-        }
     }catch(const std::bad_alloc& e){
         throw std::runtime_error("Error allocation memory T_T");
     }
 }
 
-BinaryPriorityQueue::~BinaryPriorityQueue(){
+BinaryPriorityQueue::~BinaryPriorityQueue() noexcept{
     for (size_t i = 0; i < size; i++){
         delete heap[i];
     }
@@ -40,10 +34,6 @@ void BinaryPriorityQueue::resize(){
     try{
         capacity*=2;
         Node** newHeap = new Node*[capacity];
-        if (!newHeap){
-            throw std::bad_alloc();
-        }
-
         for (size_t i = 0; i<size; ++i){
             newHeap[i] = heap[i];
         }
