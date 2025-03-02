@@ -2,6 +2,8 @@
 #include <algorithm>
 #include <cstring>
 
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "DanglingPointer"
 BinaryPriorityQueue::Node::Node(int p, const char* d) : priority(p){
     try{
         data = new char[strlen(d)+1];
@@ -34,6 +36,7 @@ void BinaryPriorityQueue::resize(){
     try{
         capacity*=2;
         Node** newHeap = new Node*[capacity];
+
         for (size_t i = 0; i<size; ++i){
             newHeap[i] = heap[i];
         }
@@ -59,25 +62,26 @@ void BinaryPriorityQueue::heapUp(int index){
 }
 
 void BinaryPriorityQueue::heapDown(int index){
-    while(true){
-        int left = index * 2 + 1;
-        int right = index * 2 + 2;
-        int root = index;
+    int largest = index;
+    while (true) {
+        int left = 2 * index + 1;
+        int right = 2 * index + 2;
 
-        if (left < size && heap[left]->priority > heap[index]->priority){
-            root = left;
+        if (left < size && heap[left]->priority > heap[largest]->priority)
+            largest = left;
+
+        if (right < size && heap[right]->priority > heap[largest]->priority)
+            largest = right;
+
+        if (largest != index) {
+            std::swap(heap[index], heap[largest]);
+            index = largest;
+        } else {
+            break;
         }
-
-        if (right < size && heap[right]->priority > heap[index]->priority){
-            root = right;
-        }
-
-        if (root == index) break;
-
-        std::swap(heap[index], heap[root]);
-        index = root;
     }
 }
+
 
 void BinaryPriorityQueue::insert(int priority, const char* data){
     try{
@@ -113,7 +117,7 @@ void BinaryPriorityQueue::remove(){
         }
 }
 PriorityQueue& BinaryPriorityQueue::merge(PriorityQueue& other){
-    BinaryPriorityQueue* otherQueue = dynamic_cast<BinaryPriorityQueue*>(&other);
+    auto otherQueue = dynamic_cast<BinaryPriorityQueue*>(&other);
     if (!otherQueue){
         throw std::invalid_argument("Failed while dinamic_cast J_J");
     }
