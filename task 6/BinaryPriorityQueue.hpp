@@ -24,7 +24,7 @@ private:
     void heapDown(int index);
 public:
     BinaryPriorityQueue();
-    virtual ~BinaryPriorityQueue() noexcept;
+    ~BinaryPriorityQueue() noexcept override;
 
     void insert(int priority, const char* value) override;
     const char* peek() const override;
